@@ -1,0 +1,11 @@
+{
+  "name": "odoo-server",
+  "version": "1.0.0",
+  "type": "module",
+  "dependencies": {
+    "express": "5.1.0",
+    "cors": "2.8.5",
+    "body-parser": "2.2.0",
+    "node-fetch": "2.7.0"
+  }
+}
