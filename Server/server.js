@@ -52,19 +52,26 @@ app.get("/api/test-login", async (req, res) => {
     res.status(500).json({ success: false, message: error.message });
   }
 });
-
-app.get ("/api/products", async (req, res) => {
+app.get("/api/products", async (req, res) => {
   try {
-    const products = await odooRpc("product.product", "search_read", [[]], { fields: ["id", "name", "default_code", "qty_available", "image_1920", "categ_id", "product_tmpl_id"] }
-    );
+    const products = await odooRpc("product.product", "search_read", [[]], {
+      fields: [
+        "id",
+        "name",
+        "default_code",
+        "qty_available",
+        "image_1920",
+        "product_tmpl_id",
+        "list_price",
+        "x_frontend_url" ],
+    });
     res.json(products);
-
-
   } catch (error) {
     console.error("Error fetching products:", error.message);
     res.status(500).json({ success: false, message: error.message });
   }
 });
+
 app.listen(5000, () => {
   console.log("Server is running on port 5000");
 });

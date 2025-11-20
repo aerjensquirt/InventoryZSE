@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Inventory Page</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-900 text-white min-h-screen font-sans">
+
+
+<header class="flex items-center p-6 bg-gray-900/70 backdrop-blur-xl border-b border-gray-700">
+  <img ngSrc="assets/images/logoZSE.png" alt="Logo" class="h-12 opacity-90" height="134" width="300"/>
+</header>
+
+
+<div class="mx-auto mt-12 w-11/12 max-w-7xl p-6">
+
+  <h1 class="text-3xl font-bold mb-6 tracking-tight text-white">Inventory</h1>
+
+  <div class="overflow-hidden rounded-3xl shadow-2xl border border-gray-800 bg-gray-800/40 backdrop-blur-2xl">
+    <table class="w-full border-collapse">
+      <thead>
+      <tr class="bg-gray-800/60 text-left text-gray-300 text-sm uppercase tracking-wider">
+        <th class="p-5 font-semibold border-b border-gray-700">Photo</th>
+        <th class="p-5 font-semibold border-b border-gray-700">Serial Number</th>
+        <th class="p-5 font-semibold border-b border-gray-700">Name</th>
+        <th class="p-5 font-semibold border-b border-gray-700">Quantity</th>
+        <th class="p-5 font-semibold border-b border-gray-700">URL</th>
+        <th class="p-5 font-semibold border-b border-gray-700">Price</th>
+        <th class="p-5 font-semibold border-b border-gray-700">Actions</th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr *ngFor="let item of inventoryItems()" class="border-b border-gray-700">
+        <td>
+          <img *ngIf="item.image_1920"
+               [src]="'data:image/png;base64,' + item.image_1920"
+               alt="{{ item.name }}"
+               class="w-16 h-16 object-contain" />
+        </td>
+        <td class="p-4 border-r border-gray-700">{{ item.default_code }}</td>
+        <td class="p-4 border-r border-gray-700">{{ item.name }}</td>
+        <td class="p-4 border-r border-gray-700">{{ item.qty_available }}</td>
+        <td class="p-4 border-r border-gray-700">
+          <a *ngIf="item.x_frontend_url" [href]="item.x_frontend_url" target="_blank" class="text-blue-400 hover:underline">Link</a>
+        </td>
+        <td class="p-4 border-r border-gray-700">{{ item.list_price ?? 'N/A' }}</td>
+        <td class="p-4"></td>
+      </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+</body>
+</html>
