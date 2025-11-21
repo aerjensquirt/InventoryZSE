@@ -2,7 +2,8 @@ import express from "express";
 import cors from "cors";
 import bodyParser from "body-parser";
 import fetch from "node-fetch";
-
+import multer from 'multer';
+const upload = multer();
 const app = express();
 app.use(cors());
 app.use(bodyParser.json());
@@ -71,6 +72,33 @@ app.get("/api/products", async (req, res) => {
     res.status(500).json({ success: false, message: error.message });
   }
 });
+
+app.post("/api/createProduct", upload.single('image'), async (req, res) => {
+  try {
+    const { name, default_code, list_price, x_frontend_url, qty_available } = req.body;
+    let image_1920 = undefined;
+    if (req.file) {
+      image_1920 = req.file.buffer.toString('base64');
+    }
+    const productId = await odooRpc("product.product", "create", [{
+      name,
+      default_code,
+      list_price: parseFloat(list_price),
+      x_frontend_url,
+      qty_available: parseInt(qty_available, 10),
+      image_1920, // field for main image in Odoo
+    }]);
+    res.json({ success: true, productId });
+  } catch (error) {
+    console.error("Error creating product:", error.message);
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+
+
+
+
 
 app.listen(5000, () => {
   console.log("Server is running on port 5000");
