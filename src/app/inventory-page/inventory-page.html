@@ -14,17 +14,73 @@
 
 <div class="mx-auto mt-12 w-11/12 max-w-7xl p-6">
 
+
   <div class="flex justify-between items-center mb-6">
     <h1 class="text-3xl font-bold tracking-tight text-white">Inventory</h1>
-    <button
-      (click)="openCreateProduct()"
-      class="bg-blue-600 text-white px-4 py-2 rounded shadow hover:bg-blue-700"
-    >
-      + Nieuw product
-    </button>
+    <div class="flex space-x-4">
+      <button
+        (click)="openCreateProduct()"
+        class="bg-blue-600 text-white px-4 py-2 rounded shadow hover:bg-blue-700"
+      >
+        + Nieuw product
+      </button>
+      <button
+        (click)="openCreateCategory()"
+        class="bg-green-600 text-white px-4 py-2 rounded shadow hover:bg-green-700"
+      >
+        + Nieuwe categorie/groep
+      </button>
+    </div>
   </div>
 
-  <!-- Modal voor nieuw product -->
+
+  @if (showCreateCategory) {
+    <div class="fixed top-0 left-0 w-full h-full bg-black/60 flex items-center justify-center z-50">
+      <div class="bg-gray-800 p-8 rounded shadow-lg space-y-8 w-full max-w-md">
+        <form #createGroupForm="ngForm" (ngSubmit)="createGroup()" class="space-y-4">
+          <h2 class="text-lg font-bold mb-2">Nieuwe groep</h2>
+          <input
+            name="group_name"
+            [(ngModel)]="groupData.name"
+            required
+            placeholder="Groepnaam"
+            class="block w-full p-2 rounded bg-gray-700 text-white"
+          />
+          <div class="flex justify-end space-x-3">
+            <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded">Opslaan</button>
+          </div>
+        </form>
+
+        <hr class="border-gray-600">
+        <form #createCategoryForm="ngForm" (ngSubmit)="createCategory()" class="space-y-4">
+          <h2 class="text-lg font-bold mb-2">Nieuwe categorie</h2>
+          <input
+            name="display_name"
+            [(ngModel)]="categoryData.display_name"
+            required
+            placeholder="Categorie naam"
+            class="block w-full p-2 rounded bg-gray-700 text-white"
+          />
+          <select
+            name="group_id"
+            [(ngModel)]="categoryData.group_id"
+            required
+            class="block w-full p-2 rounded bg-gray-700 text-white"
+          >
+            <option value="">Selecteer groep</option>
+            <option *ngFor="let group of groups" [value]="group.id">{{ group.name }}</option>
+          </select>
+          <div class="flex justify-end space-x-3">
+            <button type="button" (click)="closeCreateCategory()" class="px-4 py-2">Annuleren</button>
+            <button type="submit" class="bg-green-600 text-white px-4 py-2 rounded">Opslaan</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  }
+
+
+
   @if (showCreateProduct) {
     <div class="fixed top-0 left-0 w-full h-full bg-black/60 flex items-center justify-center z-50">
       <form #createForm="ngForm" (ngSubmit)="createProduct()" enctype="multipart/form-data" class="bg-gray-800 p-8 rounded shadow-lg space-y-4 w-full max-w-md">
@@ -40,50 +96,90 @@
           <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded">Opslaan</button>
         </div>
       </form>
-
     </div>
   }
 
-  <div class="overflow-hidden rounded-3xl shadow-2xl border border-gray-800 bg-gray-800/40 backdrop-blur-2xl">
-    <table class="w-full border-collapse">
-      <thead>
-      <tr class="bg-gray-800/60 text-left text-gray-300 text-sm uppercase tracking-wider">
-        <th class="p-5 font-semibold border-b border-gray-700">Photo</th>
-        <th class="p-5 font-semibold border-b border-gray-700">Serial Number</th>
-        <th class="p-5 font-semibold border-b border-gray-700">Name</th>
-        <th class="p-5 font-semibold border-b border-gray-700">Quantity</th>
-        <th class="p-5 font-semibold border-b border-gray-700">URL</th>
-        <th class="p-5 font-semibold border-b border-gray-700">Price</th>
-        <th class="p-5 font-semibold border-b border-gray-700">Category</th>
-        <th class="p-5 font-semibold border-b border-gray-700">Actions</th>
-      </tr>
-      </thead>
-      <tbody>
-        @for (item of inventoryItems(); track item.id) {
-          <tr class="border-b border-gray-700">
-            <td class="p-4 border-r border-gray-700">
-              @if (item.image_1920) {
-                <img
-                  [src]="'data:image/png;base64,' + item.image_1920"
-                  alt="{{ item.name }}"
-                  class="w-16 h-16 object-contain" />
-              }
-            </td>
-            <td class="p-4 border-r border-gray-700">{{ item.default_code }}</td>
-            <td class="p-4 border-r border-gray-700">{{ item.name }}</td>
-            <td class="p-4 border-r border-gray-700">{{ item.qty_available }}</td>
-            <td class="p-4 border-r border-gray-700">
-              @if (item.x_frontend_url) {
-                <a [href]="item.x_frontend_url" target="_blank" class="text-blue-400 hover:underline">Link</a>
-              }
-            </td>
-            <td class="p-4 border-r border-gray-700">{{ item.list_price ?? 'N/A' }}</td>
-            <td class="p-4 border-r border-gray-700">{{ item.categ_id?.display_name ?? 'N/A' }}</td>
-            <td class="p-4"></td>
-          </tr>
-        }
-      </tbody>
-    </table>
+
+  <div class="flex mt-6 space-x-6">
+
+
+    <div class="w-64 p-4 bg-gray-800/40 rounded-xl backdrop-blur-md shadow">
+      <h3 class="font-bold mb-3 text-lg">Filter op</h3>
+
+
+      <div>
+        <h4 class="font-semibold text-gray-300">Categorieën</h4>
+        <ul>
+          <li *ngFor="let category of categories">
+            <button
+              (click)="filterByCategory(category)"
+              class="text-left w-full px-2 py-1 my-1 rounded hover:bg-gray-700">
+              {{ category.x_name || category.name }}
+
+            </button>
+          </li>
+        </ul>
+      </div>
+
+
+      <div class="mt-4">
+        <h4 class="font-semibold text-gray-300">Groepen</h4>
+        <ul>
+          <li *ngFor="let group of groups">
+            <button
+              (click)="filterByGroup(group)"
+              class="text-left w-full px-2 py-1 my-1 rounded hover:bg-gray-700">
+              {{ group.x_name || group.name }}
+
+            </button>
+          </li>
+        </ul>
+      </div>
+    </div>
+
+
+    <div class="flex-1 overflow-hidden rounded-3xl shadow-2xl border border-gray-800 bg-gray-800/40 backdrop-blur-2xl">
+      <table class="w-full border-collapse">
+        <thead>
+        <tr class="bg-gray-800/60 text-left text-gray-300 text-sm uppercase tracking-wider">
+          <th class="p-5 font-semibold border-b border-gray-700">Photo</th>
+          <th class="p-5 font-semibold border-b border-gray-700">Serial Number</th>
+          <th class="p-5 font-semibold border-b border-gray-700">Name</th>
+          <th class="p-5 font-semibold border-b border-gray-700">Quantity</th>
+          <th class="p-5 font-semibold border-b border-gray-700">URL</th>
+          <th class="p-5 font-semibold border-b border-gray-700">Price</th>
+          <th class="p-5 font-semibold border-b border-gray-700">Category</th>
+          <th class="p-5 font-semibold border-b border-gray-700">Actions</th>
+        </tr>
+        </thead>
+        <tbody>
+          @for (item of productsToDisplay; track item.id) {
+            <tr class="border-b border-gray-700">
+              <td class="p-4 border-r border-gray-700">
+                @if (item.image_1920) {
+                  <img
+                    [src]="'data:image/png;base64,' + item.image_1920"
+                    alt="{{ item.name }}"
+                    class="w-16 h-16 object-contain" />
+                }
+              </td>
+              <td class="p-4 border-r border-gray-700">{{ item.default_code }}</td>
+              <td class="p-4 border-r border-gray-700">{{ item.name }}</td>
+              <td class="p-4 border-r border-gray-700">{{ item.qty_available }}</td>
+              <td class="p-4 border-r border-gray-700">
+                @if (item.x_frontend_url) {
+                  <a [href]="item.x_frontend_url" target="_blank" class="text-blue-400 hover:underline">Link</a>
+                }
+              </td>
+              <td class="p-4 border-r border-gray-700">{{ item.list_price ?? 'N/A' }}</td>
+              <td class="p-4 border-r border-gray-700">{{ item.categ_id?.[1] ?? 'N/A' }}</td>
+              <td class="p-4 border-r border-gray-700"></td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
   </div>
 </div>
 

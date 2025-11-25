@@ -40,7 +40,7 @@ async function odooRpc(model, method, args = [], kwargs = {}) {
   return data.result;
 }
 
-app.get("/api/test-login", async (req, res) => {
+app.post("/api/test-login", async (req, res) => {
   try {
     console.log("Test");
 
@@ -64,7 +64,10 @@ app.get("/api/products", async (req, res) => {
         "image_1920",
         "product_tmpl_id",
         "list_price",
-        "x_frontend_url" ],
+        "x_frontend_url",
+        "x_frontend_category",
+        "x_frontend_group",
+        "categ_id"],
     });
     res.json(products);
   } catch (error) {
@@ -86,7 +89,7 @@ app.post("/api/createProduct", upload.single('image'), async (req, res) => {
       list_price: parseFloat(list_price),
       x_frontend_url,
       qty_available: parseInt(qty_available, 10),
-      image_1920, // field for main image in Odoo
+      image_1920,
     }]);
     res.json({ success: true, productId });
   } catch (error) {
@@ -95,6 +98,50 @@ app.post("/api/createProduct", upload.single('image'), async (req, res) => {
   }
 });
 
+app.get("/api/groups", async (req, res) => {
+  try {
+    const groups = await odooRpc("x_item_group", "search_read", [[]], { fields: ["id", "x_name", "x_prefix"] });
+    res.json(groups);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+
+});
+
+app.get("/api/categorys", async (req, res) => {
+  try {
+    const categories = await odooRpc("x_item_category", "search_read", [[]], { fields: ["id", "x_name", "x_group_id"] });
+    res.json(categories);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.post("/api/createCategory", async (req, res) => {
+  try {
+    const { name, group_id } = req.body;
+    if (!name?.trim()) return res.status(400).json({ error: "Naam verplicht" });
+    if (!group_id) return res.status(400).json({ error: "Groep verplicht" });
+    const newId = await odooRpc("x_item_category", "create", [{ x_name: name, x_group_id: group_id }]);
+    const newRec = await odooRpc("x_item_category", "read", [[newId], ["id", "x_name", "x_group_id"]]);
+    res.json(newRec[0]);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.post("/api/createGroup", async (req, res) => {
+  try {
+    const { name } = req.body;
+    if (!name?.trim()) return res.status(400).json({ error: "Naam verplicht" });
+    const prefix = String(Math.floor(Math.random() * 90000) + 10000);
+    const newId = await odooRpc("x_item_group", "create", [{ x_name: name, x_prefix: prefix }]);
+    const newRec = await odooRpc("x_item_group", "read", [[newId], ["id", "x_name", "x_prefix"]]);
+    res.json(newRec[0]);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+})
 
 
 
