@@ -65,8 +65,8 @@ app.get("/api/products", async (req, res) => {
         "product_tmpl_id",
         "list_price",
         "x_frontend_url",
-        "x_frontend_category",
         "x_frontend_group",
+        "x_frontend_category",
         "categ_id"],
     });
     res.json(products);
@@ -90,6 +90,8 @@ app.post("/api/createProduct", upload.single('image'), async (req, res) => {
       x_frontend_url,
       qty_available: parseInt(qty_available, 10),
       image_1920,
+      x_frontend_group,
+      x_frontend_category,
     }]);
     res.json({ success: true, productId });
   } catch (error) {
@@ -117,31 +119,55 @@ app.get("/api/categorys", async (req, res) => {
   }
 });
 
-app.post("/api/createCategory", async (req, res) => {
+app.post("/api/createCategory", upload.none(), async (req, res) => {
   try {
     const { name, group_id } = req.body;
-    if (!name?.trim()) return res.status(400).json({ error: "Naam verplicht" });
-    if (!group_id) return res.status(400).json({ error: "Groep verplicht" });
-    const newId = await odooRpc("x_item_category", "create", [{ x_name: name, x_group_id: group_id }]);
-    const newRec = await odooRpc("x_item_category", "read", [[newId], ["id", "x_name", "x_group_id"]]);
-    res.json(newRec[0]);
+
+    if (!name?.trim()) return res.status(400).json({ success: false, error: "Naam verplicht" });
+    if (!group_id) return res.status(400).json({ success: false, error: "Groep verplicht" });
+
+    const newId = await odooRpc("x_item_category", "create", [{
+      x_name: name,
+      x_group_id: Number(group_id)
+    }]);
+
+    const newRec = await odooRpc("x_item_category", "read", [
+      [newId],
+      ["id", "x_name", "x_group_id"]
+    ]);
+
+    res.json({ success: true, category: newRec[0] });
+
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ success: false, error: err.message });
   }
 });
 
-app.post("/api/createGroup", async (req, res) => {
+app.post("/api/createGroup", upload.none(), async (req, res) => {
   try {
     const { name } = req.body;
-    if (!name?.trim()) return res.status(400).json({ error: "Naam verplicht" });
+
+    if (!name?.trim()) return res.status(400).json({ success: false, error: "Naam verplicht" });
+
     const prefix = String(Math.floor(Math.random() * 90000) + 10000);
-    const newId = await odooRpc("x_item_group", "create", [{ x_name: name, x_prefix: prefix }]);
-    const newRec = await odooRpc("x_item_group", "read", [[newId], ["id", "x_name", "x_prefix"]]);
-    res.json(newRec[0]);
+
+    const newId = await odooRpc("x_item_group", "create", [{
+      x_name: name,
+      x_prefix: prefix
+    }]);
+
+    const newRec = await odooRpc("x_item_group", "read", [
+      [newId],
+      ["id", "x_name", "x_prefix"]
+    ]);
+
+    res.json({ success: true, group: newRec[0] });
+
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ success: false, error: err.message });
   }
-})
+});
+
 
 
 

@@ -68,7 +68,7 @@
             class="block w-full p-2 rounded bg-gray-700 text-white"
           >
             <option value="">Selecteer groep</option>
-            <option *ngFor="let group of groups" [value]="group.id">{{ group.name }}</option>
+            <option *ngFor="let group of groups" [value]="group.id">{{ group.x_name || group.name }}</option>
           </select>
           <div class="flex justify-end space-x-3">
             <button type="button" (click)="closeCreateCategory()" class="px-4 py-2">Annuleren</button>
@@ -105,33 +105,27 @@
 
     <div class="w-64 p-4 bg-gray-800/40 rounded-xl backdrop-blur-md shadow">
       <h3 class="font-bold mb-3 text-lg">Filter op</h3>
-
-
       <div>
-        <h4 class="font-semibold text-gray-300">Categorieën</h4>
-        <ul>
-          <li *ngFor="let category of categories">
-            <button
-              (click)="filterByCategory(category)"
-              class="text-left w-full px-2 py-1 my-1 rounded hover:bg-gray-700">
-              {{ category.x_name || category.name }}
-
-            </button>
-          </li>
-        </ul>
-      </div>
-
-
-      <div class="mt-4">
-        <h4 class="font-semibold text-gray-300">Groepen</h4>
         <ul>
           <li *ngFor="let group of groups">
+            <!-- Klikbare groep -->
             <button
               (click)="filterByGroup(group)"
-              class="text-left w-full px-2 py-1 my-1 rounded hover:bg-gray-700">
+              class="font-bold w-full px-2 py-1 my-1 rounded hover:bg-blue-900 hover:text-blue-200 text-left"
+            >
               {{ group.x_name || group.name }}
-
             </button>
+            <!-- Categorieën als sublijst -->
+            <ul *ngIf="groupedCategories[group.id]?.length" class="ml-3 border-l border-blue-950 pl-3">
+              <li *ngFor="let category of groupedCategories[group.id]">
+                <button
+                  (click)="filterByCategory(category)"
+                  class="w-full px-2 py-1 my-1 rounded hover:bg-gray-700 text-left"
+                >
+                  {{ category.x_name || category.name }}
+                </button>
+              </li>
+            </ul>
           </li>
         </ul>
       </div>
@@ -172,7 +166,9 @@
                 }
               </td>
               <td class="p-4 border-r border-gray-700">{{ item.list_price ?? 'N/A' }}</td>
-              <td class="p-4 border-r border-gray-700">{{ item.categ_id?.[1] ?? 'N/A' }}</td>
+              <td class="p-4 border-r border-gray-700">
+                {{ item.x_frontend_category ??  'N/A' }}
+              </td>
               <td class="p-4 border-r border-gray-700"></td>
             </tr>
           }

@@ -20,11 +20,11 @@ let allItems: any[] = [];
 })
 
 export class InventoryPage {
-  categoryData: any;
+  categoryData: any = {};
   categories: any[] = [];
   groups: any[] = [];
   filteredItems: any[] = [];
-  groupData: any;
+  groupData: any = {};
 
 
 
@@ -55,14 +55,16 @@ export class InventoryPage {
   showCreateProduct = false;
   showCreateCategory = false;
 
-  filterByCategory(category: any) {
-    this.filteredItems = this.inventoryItems().filter(item => item.x_frontend_category === category.name);
-  }
-
   filterByGroup(group: any) {
-    this.filteredItems = this.inventoryItems().filter(item => item.x_frontend_group === group.name);
+    this.filteredItems = this.inventoryItems().filter(item =>
+      item.x_frontend_group === group.x_name
+    );
   }
-
+  filterByCategory(category: any) {
+    this.filteredItems = this.inventoryItems().filter(item =>
+      item.x_frontend_category === category.x_name
+    );
+  }
   openCreateCategory() {
     this.showCreateCategory = true;
   }
@@ -106,16 +108,26 @@ export class InventoryPage {
       }
     });
   }
-
+  groupedCategories: { [groupId: number]: any[] } = {};
   loadCategories() {
-    this.inventoryService.getCategories().then((data: any[]) => {
-      this.categories = data;
+    this.inventoryService.getCategories().then((categories: any[]) => {
+      this.categories = categories;
+
+      this.groupedCategories = {};
+      categories.forEach(cat => {
+        const groupId = cat.x_group_id?.[0]; // Odoo standaard: [id, name]
+        if (!this.groupedCategories[groupId]) {
+          this.groupedCategories[groupId] = [];
+        }
+        this.groupedCategories[groupId].push(cat);
+      });
     });
   }
 
   loadGroups() {
     this.inventoryService.getGroups().then((data: any[]) => {
       this.groups = data;
+
     });
   }
     createCategory()
@@ -137,7 +149,7 @@ export class InventoryPage {
     }
     createGroup() {
       const data = new FormData();
-      data.append('name', this.categoryData.group_name);
+      data.append('name', this.groupData.name)
       this.inventoryService.createGroup(data).then((result: { success: any; }) => {
         if (result.success) {
           this.showCreateCategory = false;
