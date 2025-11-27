@@ -78,7 +78,24 @@ app.get("/api/products", async (req, res) => {
 
 app.post("/api/createProduct", upload.single('image'), async (req, res) => {
   try {
-    const { name, default_code, list_price, x_frontend_url, qty_available } = req.body;
+    const { name, default_code, list_price, x_frontend_url, qty_available, category_id} = req.body;
+    let x_frontend_group = null;
+    let x_frontend_category = null;
+
+    if (category_id) {
+      const category = await odooRpc("x_item_category", "read", [[Number(category_id)], ["x_name", "x_group_id"]]);
+      if (category.length > 0) {
+        x_frontend_category = category[0].x_name;
+        const groupId = category[0].x_group_id?.[0];
+        if (groupId) {
+          const group = await odooRpc("x_item_group", "read", [[groupId], ["x_name"]]);
+          if (group.length > 0) {
+            x_frontend_group = group[0].x_name;
+          }
+        }
+      }
+    }
+
     let image_1920 = undefined;
     if (req.file) {
       image_1920 = req.file.buffer.toString('base64');
@@ -88,11 +105,52 @@ app.post("/api/createProduct", upload.single('image'), async (req, res) => {
       default_code,
       list_price: parseFloat(list_price),
       x_frontend_url,
-      qty_available: parseInt(qty_available, 10),
       image_1920,
       x_frontend_group,
       x_frontend_category,
+      is_storable: true
+
     }]);
+
+    if (qty_available !== undefined) {
+
+      const qty = Number(qty_available);
+
+      const stockLocation = await odooRpc(
+        "stock.location",
+        "search",
+        [[["usage", "=", "internal"]]],
+        { limit: 1 }
+      );
+
+      if (stockLocation.length > 0) {
+        const existing = await odooRpc(
+          "stock.quant",
+          "search_read",
+          [[
+            ["product_id", "=", productId],
+            ["location_id", "=", stockLocation[0]]
+          ]],
+          { fields: ["id"] }
+        );
+
+        if (existing.length > 0) {
+          await odooRpc("stock.quant", "write", [
+            [existing[0].id],
+            { quantity: qty }
+          ]);
+        } else {
+          await odooRpc("stock.quant", "create", [{
+            product_id: productId,
+            location_id: stockLocation[0],
+            quantity: qty
+          }]);
+        }
+      }
+    }
+
+
+
     res.json({ success: true, productId });
   } catch (error) {
     console.error("Error creating product:", error.message);

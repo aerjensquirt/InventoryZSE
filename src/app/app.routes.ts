@@ -4,6 +4,6 @@ import {EditQuantity} from './edit-quantity/edit-quantity';
 
 export const routes: Routes = [
   {path: 'inventory',component: InventoryPage},
-  {path: 'editQTY' , component: EditQuantity}
+  {path: 'edit/:id' , component: EditQuantity}
 
 ];

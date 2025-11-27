@@ -25,6 +25,10 @@ export class InventoryPage {
   groups: any[] = [];
   filteredItems: any[] = [];
   groupData: any = {};
+  router: any;
+
+
+
 
 
 
@@ -160,4 +164,8 @@ export class InventoryPage {
         }
         });
       }
+
+  goToEdit(item: any) {
+    this.router.navigate(['/edit', item.id]);
+  }
 }
