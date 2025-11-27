@@ -37,6 +37,21 @@ export class InventoryPage {
 
     return this.filteredItems.length ? this.filteredItems : this.inventoryItems();
   }
+  get totalQty(): number {
+    const items = this.productsToDisplay;
+    return items.reduce((sum, item) => {
+      return sum + (Number(item.qty_available) || 0);
+    }, 0);
+  }
+
+  get totalPrice(): number {
+    const items = this.productsToDisplay;
+    return items.reduce((sum, item) => {
+      const qty = Number(item.qty_available) || 0;
+      const price = Number(item.list_price) || 0;
+      return sum + qty * price;
+    }, 0);
+  }
 
   ngOnInit() {
     this.inventoryService.login().subscribe(result => {

@@ -141,6 +141,19 @@
 
 
     <div class="flex-1 overflow-hidden rounded-3xl shadow-2xl border border-gray-800 bg-gray-800/40 backdrop-blur-2xl">
+
+      <div class="flex justify-between items-center px-5 pt-4 pb-2 text-sm text-gray-300">
+        <div>
+          <span class="font-semibold">Totaal aantal items:</span>
+          <span>{{ totalQty }}</span>
+        </div>
+        <div>
+          <span class="font-semibold">Totale waarde:</span>
+          <span>€ {{ totalPrice | number: '1.2-2' }}</span>
+        </div>
+      </div>
+
+
       <table class="w-full border-collapse">
         <thead>
         <tr class="bg-gray-800/60 text-left text-gray-300 text-sm uppercase tracking-wider">
