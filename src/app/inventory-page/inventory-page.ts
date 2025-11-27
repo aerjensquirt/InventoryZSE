@@ -106,7 +106,7 @@ export class InventoryPage {
     this.inventoryService.createProduct(data).then((result: { success: any; }) => {
       if (result.success) {
         this.showCreateProduct = false;
-        // evt. opnieuw inventory ophalen
+        location.reload();
       } else {
         alert('Maken product mislukt!');
       }
@@ -127,7 +127,6 @@ export class InventoryPage {
       });
     });
   }
-
   loadGroups() {
     this.inventoryService.getGroups().then((data: any[]) => {
       this.groups = data;
