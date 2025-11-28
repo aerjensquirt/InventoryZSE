@@ -70,6 +70,15 @@ export class Inventory {
     })
       .then(res => res.json());
   }
+
+
+  async archiveProducts(data: any) {
+    return fetch('http://localhost:5000/api/archiveProducts', {
+      method: 'POST',
+      body: data,
+    })
+      .then(res => res.json());
+  }
 }
 
 

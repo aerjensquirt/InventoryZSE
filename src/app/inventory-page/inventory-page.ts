@@ -190,4 +190,28 @@ export class InventoryPage {
   goToEdit(item: any) {
     this.router.navigate(['/edit', item.id]);
   }
+
+
+  archiveProducts() {
+    const idsToArchive = this.productsToDisplay
+      .filter(item => item.qty_available === 0)
+      .map(item => item.id);
+
+    if (idsToArchive.length === 0) {
+      alert('Geen producten om te archiveren.');
+      return;
+    }
+
+    const data = new FormData();
+    data.append('ids', JSON.stringify(idsToArchive));
+
+    this.inventoryService.archiveProducts(data).then((result: { success: any; }) => {
+      if (result.success) {
+        alert('Producten succesvol gearchiveerd!');
+        location.reload();
+      } else {
+        alert('Archiveren van producten mislukt!');
+      }
+    });
+  }
 }

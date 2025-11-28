@@ -226,7 +226,31 @@ app.post("/api/createGroup", upload.none(), async (req, res) => {
   }
 });
 
+app.post("/api/archiveProducts", upload.none(), async (req, res) => {
+  try {
+    const ids = JSON.parse(req.body.ids || "[]");
 
+    if (!Array.isArray(ids) || ids.length === 0) {
+      return res.status(400).json({ error: "Geen geldige IDs ontvangen." });
+    }
+    await odooRpc("product.product", "write", [ids, { active: false }]);
+    const products = await odooRpc(
+      "product.product",
+      "read",
+      [ids, ["product_tmpl_id"]]
+    );
+    const tmplIds = products
+      .map(p => p.product_tmpl_id?.[0])
+      .filter(id => id);
+    if (tmplIds.length > 0) {
+      await odooRpc("product.template", "write", [tmplIds, { active: false }]);
+    }
+    res.json({ success: true });
+  } catch (err) {
+    console.error("Error archiving product:", err);
+    res.status(500).json({ error: err.message });
+  }
+})
 
 
 
