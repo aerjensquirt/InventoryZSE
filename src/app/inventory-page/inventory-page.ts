@@ -55,7 +55,7 @@ export class InventoryPage {
 
   ngOnInit() {
     this.inventoryService.login().subscribe(result => {
-      if (result.access_token) {
+      if  (result.success)  {
         console.log(" Angular: Login successful!", result);
       } else {
         console.log(" Angular: Login failed:", result);
