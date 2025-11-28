@@ -15,6 +15,7 @@
     height="134"
     alt="Logo"
     class="h-12 opacity-90"
+    priority
   />
 </header>
 
@@ -120,16 +121,24 @@
     <div class="w-64 p-4 bg-gray-800/40 rounded-xl backdrop-blur-md shadow">
       <h3 class="font-bold mb-3 text-lg">Filter op</h3>
       <div>
+
+        <button
+          (click)="clearfilter()"
+          class="font-bold w-full px-2 py-1 my-1 rounded hover:bg-gray-800 hover:text-red-200 text-left"
+        >
+          Alle producten
+        </button>
         <ul>
           <li *ngFor="let group of groups">
-            <!-- Klikbare groep -->
+
+
+
             <button
               (click)="filterByGroup(group)"
-              class="font-bold w-full px-2 py-1 my-1 rounded hover:bg-blue-900 hover:text-blue-200 text-left"
+              class="font-bold w-full px-2 py-1 my-1 rounded hover:bg-gray-800 hover:text-blue-200 text-left"
             >
               {{ group.x_name || group.name }}
             </button>
-            <!-- Categorieën als sublijst -->
             <ul *ngIf="groupedCategories[group.id]?.length" class="ml-3 border-l border-blue-950 pl-3">
               <li *ngFor="let category of groupedCategories[group.id]">
                 <button

@@ -74,6 +74,14 @@ export class InventoryPage {
   showCreateProduct = false;
   showCreateCategory = false;
 
+
+
+  clearfilter() {
+    this.filteredItems = [];
+  }
+
+
+
   filterByGroup(group: any) {
     this.filteredItems = this.inventoryItems().filter(item =>
       item.x_frontend_group === group.x_name
